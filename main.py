@@ -12,8 +12,23 @@ class tri:
         self.points.append(point3)
     def CalculateSquareArea(self):
         return 1/2*abs((self.points[1].GetX()-self.points[0].GetX())(self.points[2].GetY()-self.points[0].GetY())-(self.points[2].GetX()-self.points[0].GetX())(self.points[1].GetY()-self.points[0].GetY()))
-    def Calculate (self):
-        return 0
+    def CalculateIncirleArea(self):
+        a = math.sqrt((self.points[1].GetX() -self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2)
+        b = math.sqrt((self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2)
+        c = math.sqrt((self.points[0].GetX() - self.points[2].GetX()) ** 2 + (self.points[0].GetY() - self.points[2].GetY()) ** 2)
+
+        # Calculate the semi-perimeter
+        s = (a + b + c) / 2
+
+        # Calculate the area of the triangle
+        triangle_area = self.CalculateSquareArea()
+        # Calculate the inradius
+        inradius = triangle_area / s
+
+        # Calculate the area of the incircle
+        incircle_area = math.pi * inradius ** 2
+
+        return incircle_area
 class point:
     x=0
     y=0
