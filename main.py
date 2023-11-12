@@ -72,13 +72,13 @@ class tri:
                         self.point1.GetZ() - self.point3.GetZ()) ** 2)
         #Неверные вычисления, тут должны использоваться координаты векторов, а не точек
         if ((edgeIndex1==1 and edgeIndex2==0) or (edgeIndex1==0 and edgeIndex2==1)):
-            scalar=self.point2.GetX()*self.point1.GetX()+self.point2.GetY()*self.point1.GetY()+self.point2.GetZ()*self.point1.GetZ()
+            scalar=(self.point1.GetX()-self.point2.GetX())*(self.point3.GetX()-self.point2.GetX())+(self.point1.GetY()-self.point2.GetY())*(self.point3.GetY()-self.point2.GetY())+(self.point1.GetZ()-self.point2.GetZ())*(self.point3.GetZ()-self.point2.GetZ())
             return scalar/(a*b)
         if ((edgeIndex1==2 and edgeIndex2==1) or (edgeIndex1==1 and edgeIndex2==2)):
-            scalar=self.point3.GetX()*self.point2.GetX()+self.point3.GetY()*self.point2.GetY()+self.point3.GetZ()*self.point2.GetZ()
+            scalar=(self.point2.GetX()-self.point3.GetX())*(self.point1.GetX()-self.point3.GetX())+(self.point2.GetY()-self.point3.GetY())*(self.point1.GetY()-self.point3.GetY())+(self.point2.GetZ()-self.point3.GetZ())*(self.point1.GetZ()-self.point3.GetZ())
             return scalar/(c*b)
         if ((edgeIndex1==2 and edgeIndex2==0) or (edgeIndex1==0 and edgeIndex2==2)):
-            scalar=self.point3.GetX()*self.point1.GetX()+self.point3.GetY()*self.point1.GetY()+self.point3.GetZ()*self.point1.GetZ()
+            scalar=(self.point2.GetX()-self.point1.GetX())*(self.point3.GetX()-self.point1.GetX())+(self.point2.GetY()-self.point1.GetY())*(self.point3.GetY()-self.point1.GetY())+(self.point2.GetZ()-self.point1.GetZ())*(self.point3.GetZ()-self.point1.GetZ())
             return scalar/(a*c)
 
 
@@ -146,11 +146,11 @@ ParseTris(text)
 circleAreaSum=0
 
 
-#maximumCos=0
+maximumCos=0
 for i in triList:
-#     #if i.CalculateMaximumCosine()>maximumCos:
-#     #    maximumCos=i.CalculateMaximumCosine()
+    if i.CalculateMaximumCosine()>maximumCos:
+       maximumCos=i.CalculateMaximumCosine()
     circleAreaSum+=i.CalculateIncirleArea()
     print(i.CalculateIncirleArea())
 print("Сумма площадей окружностей:" + str(circleAreaSum))
-#print("Косинус:"+str(maximumCos))
+print("Косинус:"+str(maximumCos))
