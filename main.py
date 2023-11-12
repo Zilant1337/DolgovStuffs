@@ -13,8 +13,6 @@ class tri:
         self.points.append(point3)
     def GetPoints(self):
         return self.points
-    def CalculateSquareArea(self):
-        return 1/2*abs((self.points[1].GetX()-self.points[0].GetX())(self.points[2].GetY()-self.points[0].GetY())-(self.points[2].GetX()-self.points[0].GetX())(self.points[1].GetY()-self.points[0].GetY()))
     def CalculateIncirleArea(self):
         a = math.sqrt((self.points[1].GetX() -self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2 +(self.points[1].GetZ() - self.points[0].GetZ()) **  2)
         b = math.sqrt((self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2 + (self.points[2].GetZ() - self.points[1].GetZ()) **  2)
@@ -24,7 +22,7 @@ class tri:
         s = (a + b + c) / 2
 
         # Calculate the area of the triangle
-        triangle_area = self.CalculateSquareArea()
+        triangle_area = math.sqrt(s*(s-a)*(s-b)*(s-c))
         # Calculate the inradius
         inradius = triangle_area / s
 
@@ -33,18 +31,29 @@ class tri:
 
         return incircle_area
 
-    def CalculateCosine(self):
-        a = math.sqrt(
-            (self.points[1].GetX() - self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2)
-        b = math.sqrt(
-            (self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2)
-        c = math.sqrt(
-            (self.points[0].GetX() - self.points[2].GetX()) ** 2 + (self.points[0].GetY() - self.points[2].GetY()) ** 2)
+    def CalculateCosine(self,edgeIndex1,edgeIndex2):
+        a = math.sqrt((self.points[1].GetX() - self.points[0].GetX()) ** 2 + (
+                    self.points[1].GetY() - self.points[0].GetY()) ** 2 + (
+                                  self.points[1].GetZ() - self.points[0].GetZ()) ** 2)
+        b = math.sqrt((self.points[2].GetX() - self.points[1].GetX()) ** 2 + (
+                    self.points[2].GetY() - self.points[1].GetY()) ** 2 + (
+                                  self.points[2].GetZ() - self.points[1].GetZ()) ** 2)
+        c = math.sqrt((self.points[0].GetX() - self.points[2].GetX()) ** 2 + (
+                    self.points[0].GetY() - self.points[2].GetY()) ** 2 + (
+                                  self.points[0].GetZ() - self.points[2].GetZ()) ** 2)
+        if ((edgeIndex1==1 and edgeIndex2==0) or (edgeIndex1==0 and edgeIndex2==1)):
+            scalar=self.points[1].GetX()*self.points[0].GetX()+self.points[1].GetY()*self.points[0].GetY()+self.points[1].GetZ()*self.points[0].GetZ()
+            return scalar/(a*b)
+        if ((edgeIndex1==2 and edgeIndex2==1) or (edgeIndex1==1 and edgeIndex2==2)):
+            scalar=self.points[2].GetX()*self.points[1].GetX()+self.points[2].GetY()*self.points[1].GetY()+self.points[2].GetZ()*self.points[1].GetZ()
+            return scalar/(c*b)
+        if ((edgeIndex1==2 and edgeIndex2==0) or (edgeIndex1==0 and edgeIndex2==2)):
+            scalar=self.points[2].GetX()*self.points[0].GetX()+self.points[2].GetY()*self.points[0].GetY()+self.points[2].GetZ()*self.points[0].GetZ()
+            return scalar/(a*c)
 
 
     def CalculateMaximumCosine(self):
-
-        max_cosine = 0.0
+        return max(self.CalculateCosine(0,1),max(self.CalculateCosine(1,2),self.CalculateCosine(0,2)))
 
 
 
