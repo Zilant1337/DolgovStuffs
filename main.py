@@ -1,7 +1,8 @@
 import math
 import numpy as np
 import re
-
+pointList=[]
+triList=[]
 class tri:
     points=[]
     def __init__(self,points):
@@ -10,12 +11,14 @@ class tri:
         self.points.append(point1)
         self.points.append(point2)
         self.points.append(point3)
+    def GetPoints(self):
+        return self.points
     def CalculateSquareArea(self):
         return 1/2*abs((self.points[1].GetX()-self.points[0].GetX())(self.points[2].GetY()-self.points[0].GetY())-(self.points[2].GetX()-self.points[0].GetX())(self.points[1].GetY()-self.points[0].GetY()))
     def CalculateIncirleArea(self):
-        a = math.sqrt((self.points[1].GetX() -self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2)
-        b = math.sqrt((self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2)
-        c = math.sqrt((self.points[0].GetX() - self.points[2].GetX()) ** 2 + (self.points[0].GetY() - self.points[2].GetY()) ** 2)
+        a = math.sqrt((self.points[1].GetX() -self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2 +(self.points[1].GetZ() - self.points[0].GetZ()) **  2)
+        b = math.sqrt((self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2 + (self.points[2].GetZ() - self.points[1].GetZ()) **  2)
+        c = math.sqrt((self.points[0].GetX() - self.points[2].GetX()) ** 2 + (self.points[0].GetY() - self.points[2].GetY()) ** 2 + (self.points[0].GetZ() - self.points[2].GetZ()) **  2)
 
         # Calculate the semi-perimeter
         s = (a + b + c) / 2
@@ -29,11 +32,27 @@ class tri:
         incircle_area = math.pi * inradius ** 2
 
         return incircle_area
+
+    def CalculateCosine(self):
+        a = math.sqrt(
+            (self.points[1].GetX() - self.points[0].GetX()) ** 2 + (self.points[1].GetY() - self.points[0].GetY()) ** 2)
+        b = math.sqrt(
+            (self.points[2].GetX() - self.points[1].GetX()) ** 2 + (self.points[2].GetY() - self.points[1].GetY()) ** 2)
+        c = math.sqrt(
+            (self.points[0].GetX() - self.points[2].GetX()) ** 2 + (self.points[0].GetY() - self.points[2].GetY()) ** 2)
+
+
+    def CalculateMaximumCosine(self):
+
+        max_cosine = 0.0
+
+
+
 class point:
-    x=0
-    y=0
-    z=0
-    def __init__(self,x=0,y=0,z=0):
+    x=int
+    y=int
+    z=int
+    def __init__(self,x,y,z):
         self.x=x
         self.y=y
         self.z=z
@@ -59,3 +78,50 @@ class point:
         self.x = x
         self.y = y
         self.z = z
+
+def ReadObjFile(file):
+    text=[]
+    text=file.readlines()
+    return text
+
+def ParsePoints(text):
+    for i in text:
+        tempText=i.split(" ")
+        for j in tempText:
+            print(j)
+        if tempText[0]=="v":
+
+            pointList.append(point(float(tempText[1]),float(tempText[2]),float(tempText[3])))
+
+def ParseTris(text):
+    for i in text:
+        tempText=i.split(" ")
+        if tempText[0]=="f":
+            print(tempText[0])
+            print(tempText[1])
+            print(tempText[2])
+            print(tempText[3])
+            triList.append(tri(pointList[int(tempText[1])-1],pointList[int(tempText[2])-1],pointList[int(tempText[3])-1]))
+
+f= open("teapot.obj","r")
+
+text = ReadObjFile(f)
+ParsePoints(text)
+ParseTris(text)
+# print("Points:")
+# cnt=0
+# for i in pointList:
+#     cnt+=1
+#     print(str(cnt)+ ": "+ str(i.GetX()) + " "+ str(i.GetY())+ " "+ str(i.GetZ()))
+# cnt=0
+# for i in triList:
+#     cnt+=1
+#     print(str(cnt)+": "+ str(i.GetPoints()))
+circleAreaSum=0
+maximumCos=0
+for i in triList:
+    if i.CalculateMaximumCosine()>maximumCos:
+        maximumCos=i.CalculateMaximumCosine()
+    circleAreaSum+=i.CalculateIncirleArea()
+print("Сумма площадей окружностей:" + str(circleAreaSum))
+print("Косинус:"+str(maximumCos))
