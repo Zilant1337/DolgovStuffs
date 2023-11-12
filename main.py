@@ -109,7 +109,7 @@ def ParsePoints(text):
 def PrintTriList():
     for i in triList:
         print("1")
-        print("x:"+str (i.GetPoints()[0].GetX()))
+        print("x:" + str(i.GetPoints()[0].GetX()))
         print("y:" + str(i.GetPoints()[0].GetY()))
         print("z:" + str(i.GetPoints()[0].GetZ()))
         print("2")
@@ -126,10 +126,7 @@ def ParseTris(text):
 
         tempText=i.split(" ")
         if tempText[0]=="f":
-            print(tempText[0])
-            print(pointList[int(tempText[1])-1])
-            print(pointList[int(tempText[2])-1])
-            print(pointList[int(tempText[3])-1])
+
             triList.append(tri(pointList[int(tempText[1])-1],pointList[int(tempText[2])-1],pointList[int(tempText[3])-1]))
 
 f= open("teapot.obj","r")
