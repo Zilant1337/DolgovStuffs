@@ -134,15 +134,7 @@ f= open("teapot.obj","r")
 text = ReadObjFile(f)
 ParsePoints(text)
 ParseTris(text)
-# print("Points:")
-# cnt=0
-# for i in pointList:
-#     cnt+=1
-#     print(str(cnt)+ ": "+ str(i.GetX()) + " "+ str(i.GetY())+ " "+ str(i.GetZ()))
-# cnt=0
-# for i in triList:
-#     cnt+=1
-#     print(str(cnt)+": "+ str(i.GetPoints()))
+
 circleAreaSum=0
 
 
@@ -151,6 +143,5 @@ for i in triList:
     if i.CalculateMaximumCosine()>maximumCos:
        maximumCos=i.CalculateMaximumCosine()
     circleAreaSum+=i.CalculateIncirleArea()
-    print(i.CalculateIncirleArea())
 print("Сумма площадей окружностей:" + str(circleAreaSum))
 print("Косинус:"+str(maximumCos))
