@@ -49,12 +49,12 @@ class tri:
         return [self.point1,self.point2,self.point3]
     def CalculateIncirleArea(self):
         a = math.sqrt((self.point2.GetX() -self.point1.GetX()) ** 2 + (self.point2.GetY() - self.point1.GetY()) ** 2 +(self.point2.GetZ() - self.point1.GetZ()) **  2)
-        b = math.sqrt((self.point3.GetX() - self.point2.GetX()) ** 2 + (self.point3.GetY() - self.point2.GetY()) ** 2 + (self.point3.GetZ() - self.point1.GetZ()) **  2)
+        b = math.sqrt((self.point3.GetX() - self.point2.GetX()) ** 2 + (self.point3.GetY() - self.point2.GetY()) ** 2 + (self.point3.GetZ() - self.point2.GetZ()) **  2)
         c = math.sqrt((self.point1.GetX() - self.point3.GetX()) ** 2 + (self.point1.GetY() - self.point3.GetY()) ** 2 + (self.point1.GetZ() - self.point3.GetZ()) **  2)
 
-        s = (a + b + c) / 2
-
-        inradius = math.sqrt(((s-a)*(s-b)*(s-c))/s)
+        p = (a + b + c) / 2
+        s= math.sqrt(p*(p-a)*(p-b)*(p-c))
+        inradius = s/p
 
         incircleArea = math.pi * inradius ** 2
 
@@ -66,7 +66,7 @@ class tri:
                         self.point2.GetZ() - self.point1.GetZ()) ** 2)
         b = math.sqrt(
             (self.point3.GetX() - self.point2.GetX()) ** 2 + (self.point3.GetY() - self.point2.GetY()) ** 2 + (
-                        self.point3.GetZ() - self.point1.GetZ()) ** 2)
+                        self.point3.GetZ() - self.point2.GetZ()) ** 2)
         c = math.sqrt(
             (self.point1.GetX() - self.point3.GetX()) ** 2 + (self.point1.GetY() - self.point3.GetY()) ** 2 + (
                         self.point1.GetZ() - self.point3.GetZ()) ** 2)
