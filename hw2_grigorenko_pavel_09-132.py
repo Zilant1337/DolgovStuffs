@@ -9,8 +9,8 @@ triList=[]
 scalePointList=[]
 root =tk.Tk()
 screenWidth = root.winfo_screenwidth()/3
-ScaleX
-ScaleY
+fig = plt.figure()
+image= np.zeros((int(screenWidth),int(screenWidth),3),dtype=np.float32)
 
 class point:
     x=int
@@ -49,7 +49,7 @@ class tri:
     point2=point
     point3=point
     def __str__(self):
-        return ("Треугольник: "+"\n1: "+str(point1)+"\n2: "+str(point2)+"\n3: "+str(point3))
+        return ("Треугольник: "+"\n1: "+str(self.point1)+"\n2: "+str(self.point2)+"\n3: "+str(self.point3))
     def __init__(self,point1,point2,point3):
         self.point1 = point1
         self.point2 = point2
@@ -96,37 +96,40 @@ def ParseTris(text):
         if tempText[0]=="f":
 
             triList.append(tri(pointList[int(tempText[1])-1],pointList[int(tempText[2])-1],pointList[int(tempText[3])-1]))
-def ScalePoints():
+def ScalePoints(Scale,color):
     # Scale matrix
     # A = (a, 0, 0
     #      0, b, 0
     #      0, 0, 1)
     for i in pointList:
-        X=np.matrix([[i.GetX()],[i.Gety()],[1]])
-        A=np.matrix([[ScaleX,0,0],[0,ScaleY,0],[0,0,1]])
+        X=np.matrix([[i.GetX()],[i.GetY()],[1]])
+        A=np.matrix([[Scale,0,0],[0,Scale,0],[0,0,1]])
         scaledX=np.matmul(A,X)
-        image[scaledX[0][0], scaledX[1][0]] = yellow
+        image[int(scaledX[0][0]), int(scaledX[1][0])] = color
 
+def GetMaxCoordinates():
+    maximum=0
+    for i in pointList:
+        maximum=max(maximum,max(abs(i.GetX()),abs(i.GetY())))
+    return maximum
+def GetMinCoords():
+    minimum=0
+    for i in pointList:
+        minimum=min(minimum,min(i.GetX(),i.GetY()))
+    return minimum
 
 
 
 f= open("teapot.obj","r")
-
-
-
 text = ReadObjFile(f)
 ParsePoints(text)
 ParseTris(text)
 
-fig = plt.figure()
+Scale=screenWidth/math.ceil(GetMaxCoordinates()-GetMinCoords())
 
-yellow=np.array([255,255,0],dtype=np.uint8)
+yellow=[255,255,0]
 
+ScalePoints(Scale,yellow)
 
-image= np.zeros((int(screenWidth),int(screenWidth),3),dtype=np.float32)
-
-for i in pointList:
-    image[i.GetX(),i.GetY()]=yellow
-
-im=plt.imshow(image)
+im=plt.imshow(image.astype('uint8'))
 
