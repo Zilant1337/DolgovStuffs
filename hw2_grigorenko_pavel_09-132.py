@@ -11,7 +11,7 @@ root =tk.Tk()
 screenWidth = root.winfo_screenwidth()/3
 fig = plt.figure()
 image= np.zeros((int(screenWidth),int(screenWidth),3),dtype=np.float32)
-
+transformedPointList=[]
 class point:
     x=int
     y=int
@@ -95,8 +95,11 @@ def ParseTris(text):
         tempText=i.split(" ")
         if tempText[0]=="f":
 
-            triList.append(tri(pointList[int(tempText[1])-1],pointList[int(tempText[2])-1],pointList[int(tempText[3])-1]))
-def ScalePoints(Scale,color):
+            triList.append(tri(transformedPointList[int(tempText[1])-1],transformedPointList[int(tempText[2])-1],transformedPointList[int(tempText[3])-1]))
+
+
+
+def ScalePoints(Scale):
     # Scale matrix
     # A = (a, 0, 0
     #      0, b, 0
@@ -104,8 +107,74 @@ def ScalePoints(Scale,color):
     for i in pointList:
         X=np.matrix([[i.GetX()],[i.GetY()],[1]])
         A=np.matrix([[Scale,0,0],[0,Scale,0],[0,0,1]])
+        T=np.matrix([[1,0,screenWidth/2],[0,1,screenWidth/2],[0,0,1]])
+        F=np.matrix([[-1,0,0],[0,1,0],[0,0,1]])
+        R=np.matrix([[math.cos(math.radians(90)),-1*math.sin(math.radians(90)),0],[math.sin(math.radians(90)),math.cos(math.radians(90)),0],[0,0,1]])
         scaledX=np.matmul(A,X)
-        image[int(scaledX[0][0]), int(scaledX[1][0])] = color
+        flippedX=np.matmul(F,scaledX)
+        rotatedX=np.matmul(R,flippedX)
+        translatedX=np.matmul(T,rotatedX)
+        color=[255,int(translatedX[1][0]/screenWidth*255),0]
+        print(color)
+        image[int(translatedX[0][0]), int(translatedX[1][0])] = color
+        transformedPointList.append(point(translatedX[0][0],translatedX[1][0],i.GetZ))
+
+
+def BresenhamLineLow(x0,y0,x1,y1):
+    dx = x1-x0
+    dy = y1-y0
+    yi=1
+    if dy<0:
+        yi=-1
+        dy=-dy
+    D = 2 * dy - dx
+    y = y0
+
+    for j in range(int(x0), int(x1)):
+        color = [255, int(y / screenWidth * 255), 0]
+        image[int(j), int(y)] = color
+        if D > 0:
+            y = y + yi
+            D = D - 2 * dx
+        else:
+            D = D + 2 * dy
+def BresenhamLineHigh(x0,y0,x1,y1):
+    dx = x1 - x0
+    dy = y1 - y0
+    xi = 1
+    if dx < 0:
+        xi = -1
+        dx = -dx
+    D = 2 * dx - dy
+    x = x0
+
+    for j in range(int(y0), int(y1)):
+        color = [255, int(j / screenWidth * 255), 0]
+        image[int(x), int(j)] = color
+        if D > 0:
+            x = x + xi
+            D = D + (2 * (dx-dy))
+        else:
+            D = D + 2 * dx
+def BresenhamLineUniversal(x0,y0,x1,y1):
+    if abs(y1 - y0) < abs(x1 - x0):
+        if x0 > x1:
+            BresenhamLineLow(x1, y1, x0, y0)
+        else:
+            BresenhamLineLow(x0, y0, x1, y1)
+    else:
+        if y0 > y1:
+            BresenhamLineHigh(x1, y1, x0, y0)
+        else:
+            BresenhamLineHigh(x0, y0, x1, y1)
+
+
+def BresenhamLineAlgorithm():
+    for i in triList:
+        BresenhamLineUniversal(i.point1.GetX(),i.point1.GetY(),i.point2.GetX(),i.point2.GetY())
+        BresenhamLineUniversal(i.point2.GetX(),i.point2.GetY(),i.point3.GetX(),i.point3.GetY())
+        BresenhamLineUniversal(i.point3.GetX(),i.point3.GetY(),i.point1.GetX(),i.point1.GetY())
+
 
 def GetMaxCoordinates():
     maximum=0
@@ -123,13 +192,18 @@ def GetMinCoords():
 f= open("teapot.obj","r")
 text = ReadObjFile(f)
 ParsePoints(text)
-ParseTris(text)
 
 Scale=screenWidth/math.ceil(GetMaxCoordinates()-GetMinCoords())
 
 yellow=[255,255,0]
 
-ScalePoints(Scale,yellow)
+ScalePoints(Scale)
+ParseTris(text)
+BresenhamLineAlgorithm()
 
 im=plt.imshow(image.astype('uint8'))
+PrintTriList()
 
+plt.savefig("teapot.png")
+
+plt.show()
