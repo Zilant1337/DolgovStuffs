@@ -40,7 +40,7 @@ class tri:
     point2=point
     point3=point
     def __str__(self):
-        return ("Треугольник: "+"\n1: "+str(point1)+"\n2: "+str(point2)+"\n3: "+str(point3))
+        return ("Треугольник: "+"\n1: "+str(self.point1)+"\n2: "+str(self.point2)+"\n3: "+str(self.point3))
     def __init__(self,point1,point2,point3):
         self.point1 = point1
         self.point2 = point2

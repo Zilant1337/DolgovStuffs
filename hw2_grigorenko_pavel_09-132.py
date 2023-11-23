@@ -171,30 +171,30 @@ def BresenhamAlt(x0,y0,x1,y1):
     x1 = int(x1)
     y1 = int(y1)
 
-    dx=abs(x1-x0)
+    deltaX=abs(x1-x0)
     if x0<x1:
         sx=1
     else:
         sx=-1
-    dy=-abs(y1-y0)
+    deltaY=-abs(y1-y0)
     if y0<y1:
         sy=1
     else:
         sy=-1
-    error=dx+dy
+    error=deltaX+deltaY
     while True:
         color=[255,int(y0/screenWidth*255),0]
         image[int(x0),int(y0)]=color
         if x0==x1 and y0==y1:
             break
         e2 = 2 * error
-        if e2 >= dy:
+        if e2 >= deltaY:
             if x0 == x1: break
-            error = error + dy
+            error = error + deltaY
             x0 = x0 + sx
-        if e2 <= dx:
+        if e2 <= deltaX:
             if y0 == y1: break
-            error = error + dx
+            error = error + deltaX
             y0 = y0 + sy
 
 
@@ -225,7 +225,6 @@ def GetMinCoords():
 f= open("teapot.obj","r")
 text = ReadObjFile(f)
 ParsePoints(text)
-
 Scale=screenWidth/GetMaxCoordinates()/2
 
 ScalePoints(Scale)
