@@ -10,40 +10,36 @@ tailCurveList=[]
 root =tk.Tk()
 screenWidth = root.winfo_screenwidth()/3
 fig = plt.figure()
-image= np.zeros((int(screenWidth),int(screenWidth),3),dtype=np.float32)
+image= np.full((int(screenWidth),int(screenWidth),3),[255,255,255],dtype=np.float32)
 color=[0,0,0]
 class Point:
     x=int
     y=int
-    z=int
+
     def __str__(self):
         return ("x: "+str(self.x)+" y: "+str(self.y)+" z: "+str(self.z)+" ")
-    def __init__(self,x,y,z):
+    def __init__(self,x,y):
         self.x=x
         self.y=y
-        self.z=z
+
     def  GetX(self):
         return self.x
     def  GetY(self):
         return self.y
-    def  GetZ(self):
-        return self.z
+
     def GetCoords(self):
-        return [self.x,self.y,self.z]
+        return [self.x,self.y]
     def SetX(self, x):
         self.x=x
     def SetY(self, y):
         self.y = y
-    def SetZ(self, z):
-        self.z = z
+
     def SetCoords(self,coords):
         self.x=coords[0]
         self.y=coords[1]
-        self.z=coords[2]
-    def SetCoords(self,x,y,z):
+    def SetCoords(self,x,y):
         self.x = x
         self.y = y
-        self.z = z
 
 class BezierCurve:
     point0=Point
@@ -92,18 +88,21 @@ def AddCurve(point0,point1,point2):
     pointList.append(point2)
     bodyCurveList.append(BezierCurve(point0,point1,point2))
 def DrawBezierCurve(i,color):
-    x0=i.point0.x
-    x1=i.point1.x
-    x2 = i.point2.x
-    y0 = i.point0.y
-    y1 = i.point1.y
-    y2 = i.point2.y
-    sx = int(x2-x1)
-    sy = int(y2-y1)
-    xx = int(x0-x1)
-    yy = int(y0-y1)
-    dx,dy,err,cur =float(xx*sy-yy*sx)
-    assert (xx * sx <= 0 and yy * sy <= 0);
+    x0 = i.GetPoints()[0].GetX()
+    x1 = i.GetPoints()[1].GetX()
+    x2 = i.GetPoints()[2].GetX()
+    y0 = i.GetPoints()[0].GetY()
+    y1 = i.GetPoints()[1].GetY()
+    y2 = i.GetPoints()[2].GetY()
+    sx = x2-x1
+    sy = y2-y1
+    xx = x0-x1
+    yy = y0-y1
+    dx =xx*sy-yy*sx
+    dy =xx*sy-yy*sx
+    err =xx*sy-yy*sx
+    cur =xx*sy-yy*sx
+    #assert (xx * sx <= 0 and yy * sy <= 0);
     if(sx**2+sy**2>xx**2+yy**2):
         x2=x0
         x0=sx+x1
@@ -155,9 +154,17 @@ def DrawBezierCurve(i,color):
                 err+=dx
             if dy>=dx:
                 break
-    BresenhamAlt(x0,y0,x2,y2)
-def DrawBody():
-    for i in bodyCurveList:
+    #BresenhamAlt(x0,y0,x2,y2,color)
+# def DrawBody():
+#     for i in bodyCurveList:
+
+bc1=BezierCurve(Point(479,0),Point(100,400),Point(400,500))
+print(bc1.GetPoints()[0].GetX())
+DrawBezierCurve(bc1,color)
+
+im=plt.imshow(image.astype('uint8'))
+
+plt.show()
 
 
 
