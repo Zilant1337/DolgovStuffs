@@ -233,6 +233,7 @@ BresenhamLineAlgorithm()
 
 im=plt.imshow(image.astype('uint8'))
 
+plt.show()
 
 plt.savefig("teapot.png")
 

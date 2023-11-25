@@ -8,7 +8,7 @@ pointList=[]
 bodyCurveList=[]
 tailCurveList=[]
 root =tk.Tk()
-screenWidth = root.winfo_screenwidth()/3
+screenWidth = root.winfo_screenwidth()
 fig = plt.figure()
 image= np.full((int(screenWidth),int(screenWidth),3),[255,255,255],dtype=np.float32)
 color=[0,0,0]
@@ -87,32 +87,28 @@ def AddCurve(point0,point1,point2):
     pointList.append(point1)
     pointList.append(point2)
     bodyCurveList.append(BezierCurve(point0,point1,point2))
-def DrawBezierCurve(i,color):
-    x0 = i.GetPoints()[0].GetX()
-    x1 = i.GetPoints()[1].GetX()
-    x2 = i.GetPoints()[2].GetX()
-    y0 = i.GetPoints()[0].GetY()
-    y1 = i.GetPoints()[1].GetY()
-    y2 = i.GetPoints()[2].GetY()
+
+def DrawBezierCurveSegment(x0,y0,x1,y1,x2,y2,color):
     sx = x2-x1
     sy = y2-y1
     xx = x0-x1
     yy = y0-y1
-    dx =xx*sy-yy*sx
-    dy =xx*sy-yy*sx
-    err =xx*sy-yy*sx
-    cur =xx*sy-yy*sx
-    #assert (xx * sx <= 0 and yy * sy <= 0);
-    if(sx**2+sy**2>xx**2+yy**2):
+    xy = 0
+    dx = 0.0
+    dy = 0.0
+    err = 0.0
+    cur = xx*sy-yy*sx
+    assert (xx * sx <= 0 and yy * sy <= 0)
+    if xx**2+sy**2>xx**2-yy**2:
         x2=x0
         x0=sx+x1
         y2=y0
-        y0 = sy + y1
-        cur = -cur
-    if(cur!=0):
-        xx+= sx
-        if(x0 < x2):
-            sx=1
+        y0=sy+y1
+        cur=-cur
+    if cur!=0:
+        xx+=sx
+        if (x0 < x2):
+            sx = 1
             xx *= sx
         else:
             sx = -1
@@ -124,18 +120,18 @@ def DrawBezierCurve(i,color):
         else:
             sy = -1
             yy *= sy
-        xy=2*xx*yy
-        xx*=xx
-        yy*=yy
-        if(cur*sx*sy<0):
+        xy = 2 * xx * yy
+        xx**2
+        yy**2
+        if cur*sx*sy<0:
             xx=-xx
             yy=-yy
             xy=-xy
             cur=-cur
-        dx = 4.0 * sy * cur * (x1 - x0) + xx - xy
-        dy = 4.0 * sx * cur * (y0 - y1) + yy - xy
-        xx+= xx
-        yy+= yy
+        dx=4.0*sy*cur*(x1-x0)+xx-xy
+        dy=4.0*sx*cur*(y0-y1)+yy-xy
+        xx+=xx
+        yy+=yy
         err=dx+dy+xy
         while True:
             image[int(x0),int(y0)]=color
@@ -145,16 +141,66 @@ def DrawBezierCurve(i,color):
             if(2*err>dy):
                 x0+=sx
                 dx-=xy
-                dy += yy
+                dy+=yy
                 err+=dy
-            if(y1):
+            if y1:
                 y0+=sy
-                dy_=xy
-                dx += xx
+                dy-=xy
+                dx+=xx
                 err+=dx
             if dy>=dx:
                 break
-    #BresenhamAlt(x0,y0,x2,y2,color)
+    BresenhamAlt(x0,y0,x2,y2)
+
+
+
+
+def DrawBezierCurve(i,color):
+    x0 = i.GetPoints()[0].GetX()
+    x1 = i.GetPoints()[1].GetX()
+    x2 = i.GetPoints()[2].GetX()
+    y0 = i.GetPoints()[0].GetY()
+    y1 = i.GetPoints()[1].GetY()
+    y2 = i.GetPoints()[2].GetY()
+    x=x0-x1
+    y=y0-y1
+    t=x0-2*x1+x2
+    r=0.0
+    if(x*(x2-x1)>0):
+        if(y*(y2-y1)>0):
+            if(math.fabs((y0-2*y1+y2)/t*x) > abs(y)):
+                x0=x2
+                x2=x+x1
+                y0=y2
+                y2=y+y1
+        t=(x0-x1)/t
+        r=(1-t)*((1-t)*y0+2.0*t*y1)+t*t*y2
+        t = (x0 * x2 - x1 * x1) * t / (x0 - x1)
+        x = math.floor(t + 0.5)
+        y = math.floor(r + 0.5)
+        r = (y1 - y0) * (t - x0) / (x1 - x0) + y0
+        DrawBezierCurveSegment(x0, y0, x, math.floor(r + 0.5), x, y,color)
+        r = (y1 - y2) * (t - x2) / (x1 - x2) + y2
+        x1=x
+        x0=x1
+        y0=y
+        y1=math.floor(r+0.5)
+    if (y0-y1)*(y2-y1) > 0:
+        t = y0 - 2 * y1 + y2
+        t = (y0 - y1) / t
+        r = (1 - t) * ((1 - t) * x0 + 2.0 * t * x1) + t * t * x2
+        t = (y0 * y2 - y1 * y1) * t / (y0 - y1)
+        x = math.floor(r + 0.5)
+        y = math.floor(t + 0.5)
+        r = (x1 - x0) * (t - y0) / (y1 - y0) + x0
+        DrawBezierCurveSegment(x0, y0, math.floor(r + 0.5), y, x, y,color)
+        r = (x1 - x2) * (t - y2) / (y1 - y2) + x2
+        x0 = x
+        x1 = math.floor(r + 0.5)
+        y1=y
+        y0=y1
+    DrawBezierCurveSegment(x0, y0, x1, y1, x2, y2,color)
+
 # def DrawBody():
 #     for i in bodyCurveList:
 
