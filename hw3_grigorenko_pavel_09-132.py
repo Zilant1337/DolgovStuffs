@@ -17,66 +17,21 @@ fig = plt.figure()
 image= np.full((int(screenWidth),int(screenWidth),3),[19,24,98],dtype=np.float32)
 bodyColor=[0,0,0]
 eyeColor=[255,255,51]
-class Point:
-    x=int
-    y=int
 
-    def __str__(self):
-        return ("x: "+str(self.x)+" y: "+str(self.y)+" z: "+str(self.z)+" ")
-    def __init__(self,x,y):
-        self.x=x
-        self.y=y
-
-    def  GetX(self):
-        return self.x
-    def  GetY(self):
-        return self.y
-
-    def GetCoords(self):
-        return [self.x,self.y]
-    def SetX(self, x):
-        self.x=x
-    def SetY(self, y):
-        self.y = y
-
-    def SetCoords(self,coords):
-        self.x=coords[0]
-        self.y=coords[1]
-    def SetCoords(self,x,y):
-        self.x = x
-        self.y = y
-
-class BezierCurve:
-    point0=Point
-    point1=Point
-    point2=Point
-
-    def __init__(self,point1,point2,point3):
-        self.point1 = point1
-        self.point2 = point2
-        self.point3 = point3
-    def GetPoints(self):
-        return [self.point1,self.point2,self.point3]
-
-
-def make_bezier(xys):
-    # xys should be a sequence of 2-tuples (Bezier control points)
+def FormBezier(xys):
     n = len(xys)
-    combinations = pascal_row(n-1)
-    def bezier(ts):
-        # This uses the generalized formula for bezier curves
-        # http://en.wikipedia.org/wiki/B%C3%A9zier_curve#Generalization
+    combinations = PascalRow(n - 1)
+    def Bezier(ts):
         result = []
         for t in ts:
             tpowers = (t**i for i in range(n))
             upowers = reversed([(1-t)**i for i in range(n)])
             coefs = [c*a*b for c, a, b in zip(combinations, tpowers, upowers)]
-            result.append(
-                tuple(sum([coef*p for coef, p in zip(coefs, ps)]) for ps in zip(*xys)))
+            result.append(tuple(sum([coef*p for coef, p in zip(coefs, ps)]) for ps in zip(*xys)))
         return result
-    return bezier
+    return Bezier
 
-def pascal_row(n, memo={}):
+def PascalRow(n, memo={}):
     # This returns the nth row of Pascal's Triangle
     if n in memo:
         return memo[n]
@@ -95,12 +50,6 @@ def pascal_row(n, memo={}):
         result.extend(reversed(result))
     memo[n] = result
     return result
-
-def AddCurve(point0,point1,point2):
-    pointList.append(point0)
-    pointList.append(point1)
-    pointList.append(point2)
-    bodyCurveList.append(BezierCurve(point0,point1,point2))
 
 def ReadObjFile(file):
     text=[]
@@ -132,7 +81,7 @@ def ParseBodyBezierFile(text):
 
 
             points.append((int(round(float(individualCoords[0]))),int(round(float(individualCoords[1])))))
-        bezier = make_bezier(points)
+        bezier = FormBezier(points)
         points1 = bezier(ts)
         bodyCurveList.append(points1)
 
@@ -145,19 +94,42 @@ def ParseEyesBezierFile(text):
             individualCoords= j.split(",")
             if individualCoords[0] == "\n":
                 break
-
-
             points.append((int(round(float(individualCoords[0]))),int(round(float(individualCoords[1])))))
-        bezier = make_bezier(points)
+        bezier = FormBezier(points)
         points1 = bezier(ts)
         eyesCurveList.append(points1)
 
 def DrawBody(color):
     for i in bodyCurveList:
         Draw(i,color)
+    FillIn(color)
 def DrawEyes(color):
     for i in eyesCurveList:
         Draw(i,color)
+    FillIn(color)
+
+def FillIn(color):
+    for i in range (0,int(screenWidth)):
+        colorFlag = False
+        for j in range(0,int(screenWidth)):
+            if (image[i][j] == color).all() and not colorFlag and (image[i][j + 1] == color).all():
+                while (image[i][j] == color).all():
+                    j+=1
+            if (image[i][j]==color).all() and colorFlag and (image[i][j+1]!=color).any():
+                colorFlag=False
+                j+=1
+                print ("Removed color flag")
+            if (image[i][j] == color).all() and not colorFlag and not(image[i][j+1]==color).all():
+                finishedFlag=False
+                for j1 in range(j,int(screenWidth)):
+                    if (image[i][j] == color).all():
+                        finishedFlag=True
+                if finishedFlag:
+                    colorFlag=True
+                print("Added color flag")
+            if (image[i][j]!=color).any() and colorFlag:
+                image[i][j]=color
+
 
 ts = [t/screenWidth for t in range(int(screenWidth+1))]
 #
