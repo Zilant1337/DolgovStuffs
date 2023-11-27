@@ -28,6 +28,10 @@ iris1CurveList=[]
 transformedIris1PointsList=[]
 iris2CurveList=[]
 transformedIris2PointsList=[]
+noseCurveList=[]
+transformedNosePointsList=[]
+mouthCurveList=[]
+transformedMouthPointsList=[]
 
 root =tk.Tk()
 screenWidth = 2560/3
@@ -36,6 +40,7 @@ image= np.full((int(screenWidth),int(screenWidth),3),[19,24,98],dtype=np.float32
 bodyColor=[0,0,0]
 eyeColor=[255,255,51]
 irisColor=[0,0,1]
+mouthColor=[54,69,79]
 
 def FormBezier(xys):
     n = len(xys)
@@ -170,6 +175,32 @@ def ParseIris2BezierFile(text):
         bezier = FormBezier(points)
         points1 = bezier(ts)
         iris2CurveList.append(points1)
+def ParseNoseBezierFile(text):
+    for i in text:
+        tempText = i.split(" ")
+        points=[]
+        for j in tempText:
+            individualCoords=[]
+            individualCoords= j.split(",")
+            if individualCoords[0] == "\n":
+                break
+            points.append((int(round(float(individualCoords[0]))),int(round(float(individualCoords[1])))))
+        bezier = FormBezier(points)
+        points1 = bezier(ts)
+        noseCurveList.append(points1)
+def ParseMouthBezierFile(text):
+    for i in text:
+        tempText = i.split(" ")
+        points=[]
+        for j in tempText:
+            individualCoords=[]
+            individualCoords= j.split(",")
+            if individualCoords[0] == "\n":
+                break
+            points.append((int(round(float(individualCoords[0]))),int(round(float(individualCoords[1])))))
+        bezier = FormBezier(points)
+        points1 = bezier(ts)
+        mouthCurveList.append(points1)
 
 def DrawBody(color):
     for i in bodyCurveList:
@@ -193,6 +224,13 @@ def DrawIrises(color):
     for i in iris2CurveList:
         transformedIris2PointsList.extend(Draw(i,color))
     FillInIris2(color)
+def DrawNoseMouth(color):
+    for i in noseCurveList:
+        transformedNosePointsList.extend(Draw(i,color))
+    FillInNose(color)
+    for i in mouthCurveList:
+        transformedMouthPointsList.extend(Draw(i,color))
+
 
 def Fill(x, y, startColor, color):
     if (image[x][y] == color).all():
@@ -487,6 +525,53 @@ def FillInIris2(color):
                 thread.start()
                 thread.join()
                 return
+def FillInNose(color):
+    minX=screenWidth
+    minY=screenWidth
+    maxX=0
+    maxY=0
+    for i in transformedNosePointsList:
+        if i[0]<minX:
+            minX=int(i[0])
+        if i[0]>maxX:
+            maxX=int(i[0])
+        if i[1]<minY:
+            minY=int(i[1])
+        if i[1]>maxY:
+            maxY=int(i[1])
+    for i in range(minX,maxX+1):
+        for j in range(minY,maxY+1):
+            left=False
+            right=False
+            up=False
+            down=False
+            for k in range(j+1,int(screenWidth)):
+                if (image[i][k]==color).all():
+                    right=True
+                    print("Found right")
+                    break
+            for k in range(j-1,0,-1):
+                if (image[i][k]==color).all():
+                    left=True
+                    print("Found left")
+                    break
+            for k in range(i+1,int(screenWidth)):
+                if (image[k][j]==color).all():
+                    down=True
+                    print("Found down")
+                    break
+            for k in range(i-1, 0,-1):
+                if (image[k][j] == color).all():
+                    up = True
+                    print("Found up")
+                    break
+            if (left and right and up and down and (image[i][j]!=color).any()):
+                print("found all, coloring nose. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
+                # Fill(i,j,image[i][j],color)
+                thread = threading.Thread(target=Fill,args=(i,j,image[i][j],color))
+                thread.start()
+                thread.join()
+                return
 
 
 # def FillIn(color):
@@ -532,6 +617,10 @@ f5=open("Iris1Bezierpoints.txt","r")
 iris1Text=ReadObjFile(f5)
 f6=open("Iris2Bezierpoints.txt","r")
 iris2Text=ReadObjFile(f6)
+f7=open("NoseBezierpoints.txt","r")
+noseText=ReadObjFile(f7)
+f8=open("MouthBezierpoints.txt")
+mouthText=ReadObjFile(f8)
 
 ParseBodyBezierFile(bodyText)
 ParseEye1BezierFile(eye1Text)
@@ -539,15 +628,14 @@ ParseEye2BezierFile(eye2Text)
 ParseTailBezierFile(tailText)
 ParseIris1BezierFile(iris1Text)
 ParseIris2BezierFile(iris2Text)
+ParseNoseBezierFile(noseText)
+ParseMouthBezierFile(mouthText)
 DrawTail(bodyColor)
 DrawBody(bodyColor)
 DrawEyes(eyeColor)
 DrawIrises(irisColor)
+DrawNoseMouth(mouthColor)
 
-print(iris1CurveList)
-print(iris2CurveList)
-print(transformedIris1PointsList)
-print(transformedIris2PointsList)
 im = plt.imshow(image.astype('uint8'))
 
 plt.show()

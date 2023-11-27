@@ -124,5 +124,17 @@
        style="fill:none;stroke:#000000;stroke-width:0.555002px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 509.36576,162.86731 C 509.36576,162.86731 493.27198,176.22118 509.81281,194.02634 C 509.81281,194.02634 523.67135,178.44682 509.36576,162.86731 Z"
        id="path3" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 442.06735,205.76226 C 442.06735,205.76226 456.53501,201.74347 469.39515,205.76226 C 469.39515,205.76226 462.96508,213.79985 455.73125,216.21112 C 455.73125,216.21112 445.28238,213.79985 442.06735,205.76226 Z"
+       id="path4" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 454.9275,215.40737 C 454.9275,215.40737 453.31998,222.64119 455.73125,230.67878 C 455.73125,230.67878 444.47863,251.57651 433.22601,230.67878"
+       id="path8" />
+    <path
+       style="fill:none;stroke:#000000;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       d="M 455.73125,229.87502 C 455.73125,229.87502 466.98388,250.77275 477.43274,230.67878"
+       id="path9" />
   </g>
 </svg>
