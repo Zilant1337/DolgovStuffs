@@ -3,17 +3,14 @@ import numpy as np
 import re
 import tkinter as tk
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.animation import PillowWriter
 import locale
 import sys
 import threading
 
-threading.stack_size(67108864) # 64MB stack
-sys.setrecursionlimit(2 ** 20) # something real big
-                               # you actually hit the 64MB limit first
-                               # going by other answers, could just use 2**32-1
-
-# only new threads get the redefined stack size
-
+threading.stack_size(67108864)
+sys.setrecursionlimit(2 ** 20)
 
 pointList=[]
 bodyCurveList=[]
@@ -34,14 +31,18 @@ mouthCurveList=[]
 transformedMouthPointsList=[]
 
 root =tk.Tk()
+framesCount=200
+frames=[]
 screenWidth = 2560/3
 fig = plt.figure()
-image= np.full((int(screenWidth),int(screenWidth),3),[19,24,98],dtype=np.float32)
 bodyColor=[0,0,0]
 tailColor=[1,0,0]
 eyeColor=[255,255,51]
 irisColor=[0,0,1]
 mouthColor=[54,69,79]
+backgroundColor=[19,24,98]
+image= np.full((int(screenWidth),int(screenWidth),3),[19,24,98],dtype=np.float32)
+
 
 def FormBezier(xys):
     n = len(xys)
@@ -81,7 +82,7 @@ def ReadObjFile(file):
     text=file.readlines()
     return text
 
-def Draw(points,color):
+def InitialDraw(points,color):
     pointList=[]
     for i in points:
         X = np.matrix([[i[0]], [i[1]], [1]])
@@ -97,6 +98,10 @@ def Draw(points,color):
         image[int(flippedX[0][0]),int(flippedX[1][0])]=color
         pointList.append((int(flippedX[0][0]),int(flippedX[1][0])))
     return pointList
+def Draw(points,color):
+    for i in points:
+        X = np.matrix([[i[0]], [i[1]], [1]])
+        image[int(X[0][0]),int(X[1][0])]=color
 def ParseBodyBezierFile(text):
     for i in text:
         tempText = i.split(" ")
@@ -205,32 +210,32 @@ def ParseMouthBezierFile(text):
 
 def DrawBody(color):
     for i in bodyCurveList:
-        transformedBodyPointsList.extend(Draw(i,color))
+        transformedBodyPointsList.extend(InitialDraw(i,color))
     FillInBody(color)
 def DrawEyes(color):
     for i in eye1CurveList:
-        transformedEye1PointsList.extend(Draw(i,color))
+        transformedEye1PointsList.extend(InitialDraw(i,color))
     FillInEye1(color)
     for i in eye2CurveList:
-        transformedEye2PointsList.extend(Draw(i,color))
+        transformedEye2PointsList.extend(InitialDraw(i,color))
     FillInEye2(color)
 def DrawTail(color):
     for i in tailCurveList:
-        transformedTailPointsList.extend(Draw(i,color))
+        transformedTailPointsList.extend(InitialDraw(i,color))
     FillInTail(color)
 def DrawIrises(color):
     for i in iris1CurveList:
-        transformedIris1PointsList.extend(Draw(i,color))
+        transformedIris1PointsList.extend(InitialDraw(i,color))
     FillInIris1(color)
     for i in iris2CurveList:
-        transformedIris2PointsList.extend(Draw(i,color))
+        transformedIris2PointsList.extend(InitialDraw(i,color))
     FillInIris2(color)
 def DrawNoseMouth(color):
     for i in noseCurveList:
-        transformedNosePointsList.extend(Draw(i,color))
+        transformedNosePointsList.extend(InitialDraw(i,color))
     FillInNose(color)
     for i in mouthCurveList:
-        transformedMouthPointsList.extend(Draw(i,color))
+        transformedMouthPointsList.extend(InitialDraw(i,color))
 
 
 def Fill(x, y, startColor, color):
@@ -246,6 +251,7 @@ def Fill(x, y, startColor, color):
 
 
 def FillInEye1(color):
+    print("Started filling eye1")
     minX=screenWidth
     minY=screenWidth
     maxX=0
@@ -268,22 +274,18 @@ def FillInEye1(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j]!=color).any()):
                 print("found all, coloring eye1. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
@@ -294,6 +296,7 @@ def FillInEye1(color):
                 return
 
 def FillInEye2(color):
+    print("Started filling eye2")
     minX=screenWidth
     minY=screenWidth
     maxX=0
@@ -316,22 +319,18 @@ def FillInEye2(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j]!=color).any()):
                 print("found all, coloring eye2. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
@@ -341,6 +340,7 @@ def FillInEye2(color):
                 return
 
 def FillInBody(color):
+    print("Started filling body")
     minX = screenWidth
     minY = screenWidth
     maxX = 0
@@ -363,22 +363,18 @@ def FillInBody(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j]!=color).any()):
                 print("found all, coloring body. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
@@ -387,6 +383,7 @@ def FillInBody(color):
                 thread.join()
                 return
 def FillInTail(color):
+    print("Started filling tails")
     minX = screenWidth
     minY = screenWidth
     maxX = 0
@@ -409,22 +406,18 @@ def FillInTail(color):
             for k in range(j + 1, int(screenWidth)):
                 if (image[i][k] == color).all():
                     right = True
-                    print("Found right")
                     break
             for k in range(j - 1, 0, -1):
                 if (image[i][k] == color).all():
                     left = True
-                    print("Found left")
                     break
             for k in range(i + 1, int(screenWidth)):
                 if (image[k][j] == color).all():
                     down = True
-                    print("Found down")
                     break
             for k in range(i - 1, 0, -1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j] != color).any()):
                 print("found all, coloring tail. Point: X:" + str(i) + " Y:" + str(j) + " color:" + str(image[i][j]))
@@ -433,6 +426,7 @@ def FillInTail(color):
                 thread.join()
                 return
 def FillInIris1(color):
+    print("Started filling iris1")
     minX=screenWidth
     minY=screenWidth
     maxX=0
@@ -455,22 +449,18 @@ def FillInIris1(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j]!=color).any()):
                 print("found all, coloring iris1. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
@@ -480,6 +470,7 @@ def FillInIris1(color):
                 thread.join()
                 return
 def FillInIris2(color):
+    print("Started filling iris2")
     minX=screenWidth
     minY=screenWidth
     maxX=0
@@ -502,24 +493,20 @@ def FillInIris2(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
-            if (left and right and up and down and (image[i][j]!=color).any()):
+            if (left and right and up and down and ((image[i][j]==eyeColor).all() or (image[i][j]==backgroundColor).all())):
                 print("found all, coloring Iris2. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
                 # Fill(i,j,image[i][j],color)
                 thread = threading.Thread(target=Fill,args=(i,j,image[i][j],color))
@@ -527,6 +514,7 @@ def FillInIris2(color):
                 thread.join()
                 return
 def FillInNose(color):
+    print("Started filling nose")
     minX=screenWidth
     minY=screenWidth
     maxX=0
@@ -549,22 +537,18 @@ def FillInNose(color):
             for k in range(j+1,int(screenWidth)):
                 if (image[i][k]==color).all():
                     right=True
-                    print("Found right")
                     break
             for k in range(j-1,0,-1):
                 if (image[i][k]==color).all():
                     left=True
-                    print("Found left")
                     break
             for k in range(i+1,int(screenWidth)):
                 if (image[k][j]==color).all():
                     down=True
-                    print("Found down")
                     break
             for k in range(i-1, 0,-1):
                 if (image[k][j] == color).all():
                     up = True
-                    print("Found up")
                     break
             if (left and right and up and down and (image[i][j]!=color).any()):
                 print("found all, coloring nose. Point: X:"+ str(i)+" Y:"+str(j)+" color:"+str(image[i][j]))
@@ -575,33 +559,8 @@ def FillInNose(color):
                 return
 
 
-# def FillIn(color):
-#     for i in range (0,int(screenWidth)):
-#         colorFlag = False
-#         for j in range(0,int(screenWidth)):
-#             test=False
-#             if (image[i][j] == color).all() and not colorFlag and (image[i][j + 1] == color).all():
-#                 while (image[i][j] == color).all():
-#                     test=True
-#                     j+=1
-#                 colorFlag = False
-#                 print("Skipped filled row: x:" + str(i) + " y:"+ str(j)+ " color:" +str(image[i][j]))
-#                 test=True
-#             if (image[i][j]==color).all() and colorFlag and (image[i][j+1]!=color).any():
-#                 colorFlag=False
-#                 j+=1
-#             if (image[i][j] == color).all() and not colorFlag and (image[i][j+1]!=color).any():
-#                 finishedFlag=False
-#                 for j1 in range(j,int(screenWidth)):
-#                     if (image[i][j] == color).all():
-#                         finishedFlag=True
-#                 if finishedFlag:
-#                     colorFlag=True
-#
-#             if (image[i][j]!=color).any() and colorFlag:
-#                 image[i][j]=color
-#                 if(test):
-#                     print("x:" + str(i) + " y:"+ str(j))
+
+
 
 
 ts = [t/screenWidth for t in range(int(screenWidth+1))]
@@ -636,8 +595,57 @@ DrawBody(bodyColor)
 DrawEyes(eyeColor)
 DrawIrises(irisColor)
 DrawNoseMouth(mouthColor)
-
 im = plt.imshow(image.astype('uint8'))
+frames.append([im])
+
+irisMoveCounter=0
+irisTranslateMatrix =np.matrix([[1, 0, 0],[0, 1, 1], [0, 0, 1]])
+for i in range(framesCount):
+    irisMoveCounter+=1
+    image = np.full((int(screenWidth), int(screenWidth), 3), [19, 24, 98], dtype=np.float32)
+    if irisMoveCounter%3==0:
+        movedIris1 = []
+        movedIris2 = []
+        for j in transformedIris2PointsList:
+            X = np.matrix([[j[0]], [j[1]], [1]])
+            movedX = np.matmul(irisTranslateMatrix, X)
+            movedIris1.append((int(movedX[0][0]), int(movedX[1][0])))
+        for j in transformedIris1PointsList:
+            X = np.matrix([[j[0]], [j[1]], [1]])
+            movedX = np.matmul(irisTranslateMatrix, X)
+            movedIris2.append((int(movedX[0][0]), int(movedX[1][0])))
+        transformedIris1PointsList=movedIris1
+        transformedIris2PointsList=movedIris2
+    if i==50 or i==150:
+        a = irisTranslateMatrix.getA()
+        a[1][2] *= -1
+        irisTranslateMatrix = np.asmatrix(a)
+
+    Draw(transformedTailPointsList, tailColor)
+    FillInTail(tailColor)
+    Draw(transformedBodyPointsList, bodyColor)
+    FillInBody(bodyColor)
+    Draw(transformedEye1PointsList, eyeColor)
+    FillInEye1(eyeColor)
+    Draw(transformedEye2PointsList, eyeColor)
+    FillInEye2(eyeColor)
+    Draw(transformedIris2PointsList, irisColor)
+    FillInIris2(irisColor)
+    Draw(transformedIris1PointsList, irisColor)
+    FillInIris1(irisColor)
+    Draw(transformedMouthPointsList, mouthColor)
+    Draw(transformedNosePointsList, mouthColor)
+    FillInNose(mouthColor)
+    print("Generated frame" + str(i))
+    img = plt.imshow(image.astype('uint8'))
+    frames.append([img])
+
+# Animate()
+
+
+ani = animation.ArtistAnimation(fig, frames, interval=40, blit=True, repeat_delay=0)
+writer = PillowWriter(fps=24)
+ani.save("cat.gif", writer=writer)
 
 plt.show()
 
