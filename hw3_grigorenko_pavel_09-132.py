@@ -38,6 +38,7 @@ screenWidth = 2560/3
 fig = plt.figure()
 image= np.full((int(screenWidth),int(screenWidth),3),[19,24,98],dtype=np.float32)
 bodyColor=[0,0,0]
+tailColor=[1,0,0]
 eyeColor=[255,255,51]
 irisColor=[0,0,1]
 mouthColor=[54,69,79]
@@ -630,7 +631,7 @@ ParseIris1BezierFile(iris1Text)
 ParseIris2BezierFile(iris2Text)
 ParseNoseBezierFile(noseText)
 ParseMouthBezierFile(mouthText)
-DrawTail(bodyColor)
+DrawTail(tailColor)
 DrawBody(bodyColor)
 DrawEyes(eyeColor)
 DrawIrises(irisColor)
