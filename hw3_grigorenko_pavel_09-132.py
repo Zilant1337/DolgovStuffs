@@ -30,7 +30,7 @@ transformedIris1PointsList=[]
 iris1FillPoint=(176,405)
 iris2CurveList=[]
 transformedIris2PointsList=[]
-iris2FillPoint=(176,507)
+iris2FillPoint=(180,507)
 noseCurveList=[]
 transformedNosePointsList=[]
 noseFillPoint=(209,452)
@@ -548,9 +548,11 @@ for i in range(framesCount):
             X = np.matrix([[j[0]], [j[1]], [1]])
             movedX = np.matmul(irisTranslateMatrix, X)
             movedIris2.append((int(movedX[0][0]), int(movedX[1][0])))
+        print("before:"+ str(iris2FillPoint[0])+" "+str(iris2FillPoint[1]))
         X = np.matrix([[iris2FillPoint[0]], [iris2FillPoint[1]], [1]])
         movedX = np.matmul(irisTranslateMatrix, X)
         iris2FillPoint = (int(movedX[0][0]), int(movedX[1][0]))
+        print("after:" + str(iris2FillPoint[0]) + " " + str(iris2FillPoint[1]))
         transformedIris1PointsList=movedIris1
         transformedIris2PointsList=movedIris2
 
@@ -573,20 +575,20 @@ for i in range(framesCount):
 
 
     DrawTail(tailColor)
-    # FillInTail(tailColor)
+    FillInTail(tailColor)
     Draw(transformedBodyPointsList, bodyColor)
-    # FillInBody(bodyColor)
+    FillInBody(bodyColor)
     Draw(transformedEye1PointsList, eyeColor)
-    # FillInEye1(eyeColor)
+    FillInEye1(eyeColor)
     Draw(transformedEye2PointsList, eyeColor)
-    # FillInEye2(eyeColor)
-    Draw(transformedIris2PointsList, irisColor)
-    # FillInIris2(irisColor)
+    FillInEye2(eyeColor)
     Draw(transformedIris1PointsList, irisColor)
-    # FillInIris1(irisColor)
+    Draw(transformedIris2PointsList, irisColor)
+    FillInIris1(irisColor)
+    FillInIris2(irisColor)
     Draw(transformedMouthPointsList, mouthColor)
     Draw(transformedNosePointsList, mouthColor)
-    # FillInNose(mouthColor)
+    FillInNose(mouthColor)
     print("Generated frame" + str(i))
     img = plt.imshow(image.astype('uint8'))
     frames.append([img])
