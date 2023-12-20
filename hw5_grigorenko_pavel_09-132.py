@@ -418,7 +418,7 @@ def WireFrameModel():
                 img[y, x] = current_color
 
     img = np.rot90(img)
-    SaveImage(img, 'skull_res_1')
+    SaveImage(img, 'skullWireframe')
 
 
 def GrayscaleModel():
@@ -432,7 +432,7 @@ def GrayscaleModel():
             EdgeRasterization(img, edge, color)
 
     img = img[::-1, :]
-    SaveImage(img, 'skull_res_2')
+    SaveImage(img, 'skullGrayscale')
 
 
 def TexturedModel():
@@ -444,14 +444,14 @@ def TexturedModel():
             FaceTexturing(img, edge)
 
     img = img[::-1, :]
-    SaveImage(img, 'skull_res_3')
+    SaveImage(img, 'skullTextured')
 
 
 def PhongLightingModelAnimation():
     fig = plt.figure()
     ani = FuncAnimation(fig, update, frames=100)
     writer = PillowWriter()
-    ani.save('skull_animation.gif', writer=writer)
+    ani.save('skullPhongAnimation.gif', writer=writer)
     plt.show()
 
 def update():
@@ -476,9 +476,6 @@ def update():
         id = np.array([200, 200, 200])
     if 10 in iS:
         iS = np.array([200, 200, 200])
-    # ia[ia == 10] = 200
-    # id[id == 10] = 200
-    # iS[iS == 10] = 200
 
     ka += 0.05
     kd += 0.05
@@ -564,19 +561,19 @@ texture = mplimg.imread('Skull.jpg')
 w = texture.shape[0]
 h = texture.shape[1]
 
-# imagePath = 'skull31.png'
-# image = plt.imread(imagePath)
-# height, width, _ = image.shape
-# pixelMatrix = [image[y, x, :3] for y in range(height) for x in range(width)]
-# imageArray = np.array(pixelMatrix, dtype=np.uint8)
-# imageArray = imageArray[::-1, :]
+imagePath = 'skullTextured.png'
+image = plt.imread(imagePath)
+height, width, _ = image.shape
+pixelMatrix = [image[y, x, :3] for y in range(height) for x in range(width)]
+imageArray = np.array(pixelMatrix, dtype=np.uint8)
+imageArray = imageArray[::-1, :]
 
 startTime = time.time()
 
-# WireFrameModel()  # 3.125
-# GrayscaleModel()  # 175.679
-# TexturedModel()  # 229.62
-# PhongLightingModelAnimation()  # 7064.271
+# WireFrameModel()
+# GrayscaleModel()
+# TexturedModel()
+PhongLightingModelAnimation()
 
 end_time = time.time()
 execution_time = end_time - startTime
